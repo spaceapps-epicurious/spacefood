@@ -25,7 +25,7 @@ use strict;
 use warnings;
 
 # debug flags
-my $verbose = 3;
+my $verbose = 0;
 
 # limits on machine capacity
 my $bins_per_side = 9;
@@ -104,9 +104,9 @@ my @unused_feedstock;
 
 foreach my $item (sort { $feedstock_tally{$b} <=> $feedstock_tally{$a} or $a cmp $b } keys %feedstock_tally) {
         if ($feedstock_tally{$item} > 0) {
-                print "$item is used in $feedstock_tally{$item} recipes\n";
+                print "$item is used in $feedstock_tally{$item} recipes\n" if ($verbose > 0);
         } else {
-                print "$item is not required for any recipes\n";
+                print "$item is not required for any recipes\n" if ($verbose > 0);
         }
 }
 
@@ -117,12 +117,12 @@ if (scalar(@ARGV) == 1) {
 
 foreach my $entree (@ARGV) {
         next if $entree =~ m!.csv$!;  # skip the filename
-        print "Trying to match $entree\n";
+        print "Trying to match $entree\n" if ($verbose > 0);
         unless (scalar(@{$ingredients{$entree}})) {
-                print "Don't know how to make that\n";
+                print "Don't know how to make that\n" if ($verbose > 0);
                 next;
         }
-        print "It's made from ", join(",", @{$ingredients{$entree}}), "\n";
+        print "It's made from ", join(",", @{$ingredients{$entree}}), "\n" if ($verbose > 0);
 	foreach my $component (@{$ingredients{$entree}}) {
 		$compartments{$component}++;  # mark this one down (and do crude use-count stats)
 	}
@@ -130,7 +130,7 @@ foreach my $entree (@ARGV) {
 
 my $ccount = scalar(keys %compartments);
 print join("\n", %compartments) if ($verbose > 4);
-print "There are $maxbins spaces available, and $ccount bins requested.\n";
+print "There are $maxbins spaces available, and $ccount bins requested.\n" if ($verbose > 0);
 if ($ccount > $maxbins) {
 	print "Too many individual ingredients required for this frame.  Cannot create load map.\n";
 	exit;
@@ -148,7 +148,7 @@ for (my $i = 0; $i < ($maxbins - $ccount); $i++) {
 	push (@bins, "Empty"); 
 }
 
-print join("\n", @bins), "\n";
+print join("\n", @bins), "\n"  if ($verbose > 4);
 
 my $cwid = 23;
 my $t1 = Text::ASCIITable->new({ headingText => 'Left Tray' });
