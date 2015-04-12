@@ -120,6 +120,12 @@ foreach my $entree (@ARGV) {
                 next;
         }
         print "It's made from ", join(",", @{$ingredients{$entree}}), "\n";
+	foreach my $component (@{$ingredients{$entree}}) {
+		$compartments{$component}++;  # mark this one down (and do crude use-count stats)
+	}
 }
+
+my $ccount = scalar(keys %compartments);
+print "There are $maxbins spaces available, and $ccount bins requested.\n";
 
 exit;
