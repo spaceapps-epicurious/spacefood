@@ -20,6 +20,7 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+
 use strict;
 use warnings;
 
@@ -37,6 +38,8 @@ my %ingredients;
 my %compartments;
 
 use Text::CSV;
+use Text::ASCIITable;
+
 my $csv = Text::CSV->new({ sep_char => ',' });
 
 my $file = $ARGV[0] or die "Usage: $0 <CSV file> <entree> <entree> <entree>\n";
@@ -126,6 +129,55 @@ foreach my $entree (@ARGV) {
 }
 
 my $ccount = scalar(keys %compartments);
+print join("\n", %compartments) if ($verbose > 4);
 print "There are $maxbins spaces available, and $ccount bins requested.\n";
+if ($ccount > $maxbins) {
+	print "Too many individual ingredients required for this frame.  Cannot create load map.\n";
+	exit;
+}
+
+# assume 2 trays of 3x3 for now ToDo: dynamic sizing
+my %c = %compartments; #cheap hack to save typing
+
+my @bins = ();
+foreach my $item (keys %compartments) {
+	push (@bins, $item);
+}
+
+for (my $i = 0; $i < ($maxbins - $ccount); $i++) {
+	push (@bins, "Empty"); 
+}
+
+print join("\n", @bins), "\n";
+
+my $cwid = 23;
+my $t1 = Text::ASCIITable->new({ headingText => 'Left Tray' });
+$t1->setCols('one','two','three');
+$t1->setColWidth('one',$cwid,1);
+$t1->setColWidth('two',$cwid,1);
+$t1->setColWidth('three',$cwid,1);
+$t1->setOptions({ hide_HeadRow => 1 });
+$t1->addRow($bins[0], $bins[1], $bins[2]);
+$t1->addRowLine();
+$t1->addRow(@bins[3..5]);
+$t1->addRowLine();
+$t1->addRow(@bins[6..8]);
+$t1->addRowLine();
+
+my $t2 = Text::ASCIITable->new({ headingText => 'Right Tray' });
+$t2->setCols('one','two','three');
+$t2->setColWidth('one',$cwid,1);
+$t2->setColWidth('two',$cwid,1);
+$t2->setColWidth('three',$cwid,1);
+$t2->setOptions({ hide_HeadRow => 1 });
+$t2->addRow(@bins[9..11]);
+$t2->addRowLine();
+$t2->addRow(@bins[12..14]);
+$t2->addRowLine();
+$t2->addRow(@bins[15..17]);
+$t2->addRowLine();
+
+
+print $t1, "\n", $t2;
 
 exit;
